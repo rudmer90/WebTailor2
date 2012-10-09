@@ -1,10 +1,13 @@
 package webtailor2.setup;
 
-import java.io.InputStream;
+import java.io.IOException;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.FileManager;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 public class ReadODPStructure {
 
@@ -13,7 +16,6 @@ public class ReadODPStructure {
 	 */
 	public static void main(String[] args) {
 		String odpStructurePath = null;
-		Model model = null;
 		
 		//read args
 		for(int i = 0; i < args.length; i++){
@@ -27,27 +29,30 @@ public class ReadODPStructure {
 		}		
 		
 		if(odpStructurePath != null){
-			model = readODPStructureIntoModel(odpStructurePath);
+			System.out.println("PARSING...");
+			parseStructureXML(odpStructurePath);
 			System.out.println("DONE.");
-			System.out.print("MODEL = " + model.toString());
 		}
 		else{
 			System.out.println("NO FILE PATH.");
 		}
 	}
 	
-	public static Model readODPStructureIntoModel(String path){
-		Model model = ModelFactory.createDefaultModel();
+	public static void parseStructureXML(String path){
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		SAXParser structParser;
+		StructXMLHandler structHandler;
 		
-		InputStream in = FileManager.get().open(path);
-		if (in == null) {
-		    throw new IllegalArgumentException("File: " + path + " not found");
+		try{
+			structParser = spf.newSAXParser();
+			structParser.parse(path, new StructXMLHandler());
+			
+		}catch(SAXException se) {
+			se.printStackTrace();
+		}catch(ParserConfigurationException pce) {
+			pce.printStackTrace();
+		}catch (IOException ie) {
+			ie.printStackTrace();
 		}
-
-		// read the RDF/XML file
-		model.read(in, null);
-		
-		return model;
 	}
-
 }
