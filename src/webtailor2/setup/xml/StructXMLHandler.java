@@ -1,58 +1,54 @@
 package webtailor2.setup.xml;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import webtailor2.setup.model.TopicModel;
+
 
 public class StructXMLHandler extends DefaultHandler {
-	private boolean currentElement = false;
 	private String currentValue;
-	private BufferedWriter bw;
 	
-	public int numTopics = 0;
+	private HashMap<String, TopicModel> topicsMap;	
+	private int numIncompleteTopics;
+	
+	private TopicModel topic;
+	private int categoryID;
+	private String title;
+	private String description;
+	private LinkedList<String> childrenTitles;
 	
 	public StructXMLHandler(){
 		super();
+		topicsMap = new HashMap<String, TopicModel>();
+		numIncompleteTopics = 0;
 		
-		try {
-			bw = new BufferedWriter(new FileWriter("/Volumes/StorageHD/workspace/output/topics.txt"));
-		} catch (IOException e) {
-			System.out.println("ERROR: could not create output file.");
-			e.printStackTrace();
-		}
+		topic = null;
+		categoryID = -1;
+		title = null;
+		description = null;
+		childrenTitles = null;
 	}
 	
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		//NOTE: Examine the attributes, they could be what you need
-		currentElement = true;
 		if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
-			//System.out.println("STARTING TOPIC ");//TEST CODE
-			numTopics++;
+			//set up
+			topic = null;
+			categoryID = -1;
+			title = null;
+			description = null;
+			childrenTitles = null;
+			
+			//TODO: handle attributes 
 		}
 		
-		for(int i = 0; i < attributes.getLength(); i++){
-			try {
-				bw.write("\t" + i +") " + attributes.getQName(i) + " = " + attributes.getValue(i));
-				bw.newLine();
-			} catch (IOException e) {
-				System.out.println("ERROR: could not write to file.");
-				e.printStackTrace();
-			}
-		}
-		
-		try {
-			bw.flush();
-		} catch (IOException e) {
-			System.out.println("ERROR: could not flush buffer.");
-			e.printStackTrace();
-		}
+		//TODO: handle other tags
 		
 		
 	}
@@ -61,22 +57,48 @@ public class StructXMLHandler extends DefaultHandler {
 	* -- </name> )*/
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		currentElement = false;
-		if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
-			//System.out.println("ENDING TOPIC " + currentValue);//TEST CODE
+		//TODO: handle other tags
+		if(qName.equalsIgnoreCase(XMLConstants.TITLE)){
+			title = currentValue;
 		}
+		else if(qName.equalsIgnoreCase(XMLConstants.CATEGORY_ID)){
+			categoryID = Integer.parseInt(currentValue);
+		}		
+		else if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
+			if(categoryID != -1 && title != null){
+				topic = new TopicModel(categoryID, title, childrenTitles, description);
+				topicsMap.put(topic.getTitle(), topic);
+			}
+			else{//TEST CODE
+				System.out.println("ERROR: incomplete topic: ");
+				
+				if(categoryID == -1){
+					System.out.println("\tcategoryID = " + categoryID);
+				}
+				
+				if(title == null){
+					System.out.println("\t* null title.");
+				}				
+			}
+		}		
 	}
 	
 	/** Called to get tag characters ( ex:- <name>AndroidPeople</name>
 	* -- to get AndroidPeople Character ) */
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-
-		//if (currentElement) {
 			currentValue = new String(ch, start, length);
-			//System.out.println("VALUE = " + currentValue);//TEST CODE
-			//currentElement = false;
-		//}
-
+	}
+	
+	public int getNumTopics(){
+		return topicsMap.size();
+	}
+	
+	public int getIncompleteTopics(){
+		return numIncompleteTopics;
+	}
+	
+	public HashMap<String, TopicModel> getTopicsMap(){
+		return topicsMap;
 	}
 }

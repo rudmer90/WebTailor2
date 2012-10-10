@@ -7,7 +7,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 import webtailor2.setup.xml.StructXMLHandler;
 
@@ -34,6 +33,7 @@ public class ReadODPStructure {
 			System.out.println("PARSING...");
 			int numTopics = parseStructureXML(odpStructurePath);
 			System.out.println("DONE. NUM_TOPICS = " + numTopics);
+			//TODO: figure out why this number is not right
 		}
 		else{
 			System.out.println("NO FILE PATH.");
@@ -57,9 +57,6 @@ public class ReadODPStructure {
 			ie.printStackTrace();
 		}
 		
-		if(structHandler != null)
-			return structHandler.numTopics;
-		
-		return -1;
+		return structHandler.getNumTopics();
 	}
 }
