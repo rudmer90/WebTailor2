@@ -9,6 +9,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import webtailor2.setup.xml.StructXMLHandler;
+
 public class ReadODPStructure {
 
 	/**
@@ -30,22 +32,22 @@ public class ReadODPStructure {
 		
 		if(odpStructurePath != null){
 			System.out.println("PARSING...");
-			parseStructureXML(odpStructurePath);
-			System.out.println("DONE.");
+			int numTopics = parseStructureXML(odpStructurePath);
+			System.out.println("DONE. NUM_TOPICS = " + numTopics);
 		}
 		else{
 			System.out.println("NO FILE PATH.");
 		}
 	}
 	
-	public static void parseStructureXML(String path){
+	public static int parseStructureXML(String path){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		SAXParser structParser;
-		StructXMLHandler structHandler;
+		StructXMLHandler structHandler = new StructXMLHandler();
 		
 		try{
 			structParser = spf.newSAXParser();
-			structParser.parse(path, new StructXMLHandler());
+			structParser.parse(path, structHandler);
 			
 		}catch(SAXException se) {
 			se.printStackTrace();
@@ -54,5 +56,10 @@ public class ReadODPStructure {
 		}catch (IOException ie) {
 			ie.printStackTrace();
 		}
+		
+		if(structHandler != null)
+			return structHandler.numTopics;
+		
+		return -1;
 	}
 }
