@@ -31,8 +31,8 @@ public class ReadODPStructure {
 		
 		if(odpStructurePath != null){
 			System.out.println("PARSING...");
-			int numTopics = parseStructureXML(odpStructurePath);
-			System.out.println("DONE. NUM_TOPICS = " + numTopics);
+			parseStructureXML(odpStructurePath);
+			System.out.println("DONE PARSING.");
 			//TODO: figure out why this number is not right
 		}
 		else{
@@ -40,7 +40,7 @@ public class ReadODPStructure {
 		}
 	}
 	
-	public static int parseStructureXML(String path){
+	public static void parseStructureXML(String path){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		SAXParser structParser;
 		StructXMLHandler structHandler = new StructXMLHandler();
@@ -57,6 +57,6 @@ public class ReadODPStructure {
 			ie.printStackTrace();
 		}
 		
-		return structHandler.getNumTopics();
+		System.out.println(structHandler.getTopicsManager().report());
 	}
 }

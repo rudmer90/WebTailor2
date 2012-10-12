@@ -1,22 +1,21 @@
 package webtailor2.setup.xml;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import webtailor2.setup.TopicsManager;
 import webtailor2.setup.model.TopicModel;
 
 
 public class StructXMLHandler extends DefaultHandler {
 	private String currentValue;
 	
-	private HashMap<String, TopicModel> topicsMap;	
-	private int numIncompleteTopics;
+	private TopicsManager topicsManager;
+	private boolean inTopic;
 	
-	private TopicModel topic;
 	private int categoryID;
 	private String title;
 	private String description;
@@ -24,37 +23,58 @@ public class StructXMLHandler extends DefaultHandler {
 	
 	public StructXMLHandler(){
 		super();
-		topicsMap = new HashMap<String, TopicModel>();
-		numIncompleteTopics = 0;
 		
-		topic = null;
+		topicsManager = new TopicsManager();
+		inTopic = false;		
+		initVars();
+	}
+	
+	
+	public StructXMLHandler(TopicsManager manager){
+		super();
+		
+		if(manager != null){
+			topicsManager = manager;
+		}
+		else{
+			System.err.println("ERROR: StructXMLHandler cannot be created with a null TopicsManager.  Creating a default TopicsManager.");
+			topicsManager = new TopicsManager();
+		}
+		
+		inTopic = false;
+		initVars();
+	}
+	
+	private void initVars(){
 		categoryID = -1;
 		title = null;
 		description = null;
 		childrenTitles = null;
 	}
 	
+	public TopicsManager getTopicsManager(){
+		return topicsManager;
+	}
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
+			if(inTopic){
+				topicsManager.incrementNumMalformedTopics();
+			}
+			inTopic = true;
+			
 			//set up
-			topic = null;
-			categoryID = -1;
-			title = null;
-			description = null;
-			childrenTitles = null;
+			initVars();			
+			topicsManager.incrementNumTopicStarts();
 			
 			//TODO: handle attributes 
 		}
 		
-		//TODO: handle other tags
-		
-		
+		//TODO: handle other tags		
 	}
 	
-	/** Called when tag closing ( ex:- <name>AndroidPeople</name>
-	* -- </name> )*/
+	/** Called when tag closing ( ex:- <name>AndroidPeople</name> -- </name> )*/
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		//TODO: handle other tags
@@ -65,21 +85,10 @@ public class StructXMLHandler extends DefaultHandler {
 			categoryID = Integer.parseInt(currentValue);
 		}		
 		else if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
-			if(categoryID != -1 && title != null){
-				topic = new TopicModel(categoryID, title, childrenTitles, description);
-				topicsMap.put(topic.getTitle(), topic);
-			}
-			else{//TEST CODE
-				System.out.println("ERROR: incomplete topic: ");
-				
-				if(categoryID == -1){
-					System.out.println("\tcategoryID = " + categoryID);
-				}
-				
-				if(title == null){
-					System.out.println("\t* null title.");
-				}				
-			}
+			topicsManager.incrementNumTopicEnds();
+			inTopic = false;
+			
+			topicsManager.addTopic(categoryID, title, childrenTitles, description);
 		}		
 	}
 	
@@ -88,17 +97,5 @@ public class StructXMLHandler extends DefaultHandler {
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 			currentValue = new String(ch, start, length);
-	}
-	
-	public int getNumTopics(){
-		return topicsMap.size();
-	}
-	
-	public int getIncompleteTopics(){
-		return numIncompleteTopics;
-	}
-	
-	public HashMap<String, TopicModel> getTopicsMap(){
-		return topicsMap;
 	}
 }
