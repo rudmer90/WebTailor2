@@ -7,8 +7,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import webtailor2.setup.TopicsManager;
-import webtailor2.setup.model.TopicModel;
-
 
 public class StructXMLHandler extends DefaultHandler {
 	private String currentValue;
@@ -71,7 +69,9 @@ public class StructXMLHandler extends DefaultHandler {
 			//TODO: handle attributes 
 		}
 		
-		//TODO: handle other tags		
+		//TODO: handle other tags
+		
+		currentValue = new String();
 	}
 	
 	/** Called when tag closing ( ex:- <name>AndroidPeople</name> -- </name> )*/
@@ -89,13 +89,17 @@ public class StructXMLHandler extends DefaultHandler {
 			inTopic = false;
 			
 			topicsManager.addTopic(categoryID, title, childrenTitles, description);
-		}		
+		}
+		currentValue = new String();
 	}
 	
 	/** Called to get tag characters ( ex:- <name>AndroidPeople</name>
 	* -- to get AndroidPeople Character ) */
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-			currentValue = new String(ch, start, length);
+			currentValue += new String(ch, start, length);
+			if(!currentValue.isEmpty()){
+				//System.out.println("CURRENT VALUE = " + currentValue);
+			}
 	}
 }

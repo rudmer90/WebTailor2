@@ -2,33 +2,47 @@ package webtailor2.setup;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import webtailor2.setup.model.TopicModel;
 
 public class TopicsManager {
-	private HashMap<String, TopicModel> topicsMap;	
-	private int numIncompleteTopics, numMalformedTopics, numTopicStarts, numTopicEnds, numDuplicateTopics;
+	private HashMap<String, TopicModel> topicsMap;
+	private LinkedList<TopicModel> topicsList;
+	private int numIncompleteTopics, numMalformedTopics, numTopicStarts, numTopicEnds, numDuplicateTopics, numDuplicateTopicsWithDifferingCategoryIDs;
 
 	public TopicsManager(){
 		topicsMap = new HashMap<String, TopicModel>();
+		topicsList = new LinkedList<TopicModel>();
 		numIncompleteTopics =
 				numMalformedTopics =
 				numTopicStarts =
 				numTopicEnds = 
-				numDuplicateTopics = 0;
+				numDuplicateTopics = 
+				numDuplicateTopicsWithDifferingCategoryIDs = 0;
 	}
 	
 	public void addTopic(int categoryID, String title, Collection<String> childrenTitles, String description){
 		TopicModel topic;
 		
-		if(categoryID != -1 && title != null){
-			topic = new TopicModel(categoryID, title, childrenTitles, description);
-			
-			if(topicsMap.containsKey(topic.getTitle())){
+		if(categoryID != -1 && title != null  && !title.isEmpty()){
+			if(topicsMap.containsKey(title)){
 				incrementNumDuplicateTopics();
+				topic = topicsMap.get(title);
+				
+				if(topic.containsCategoryID(categoryID)){
+					incrementNumDuplicateTopicsWithDifferingCategoryIDs();
+				}
+				else{
+					topic.addCategoryID(categoryID);
+				}
+			}
+			else{
+				topic = new TopicModel(categoryID, title, childrenTitles, description);
+				topicsMap.put(topic.getTitle(), topic);	
 			}
 			
-			topicsMap.put(topic.getTitle(), topic);				
+			topicsList.add(topic);
 		}
 		else{//TEST CODE
 			System.out.println("ERROR: incomplete topic: ");
@@ -65,6 +79,10 @@ public class TopicsManager {
 		numIncompleteTopics++;
 	}
 	
+	public void incrementNumDuplicateTopicsWithDifferingCategoryIDs(){
+		numDuplicateTopicsWithDifferingCategoryIDs++;
+	}
+	
 	//ACCESSORS
 	public int getNumTopics(){
 		return topicsMap.size();
@@ -72,6 +90,10 @@ public class TopicsManager {
 	
 	public HashMap<String, TopicModel> getTopicsMap(){
 		return topicsMap;
+	}
+	
+	public LinkedList<TopicModel> getTopicsList(){
+		return topicsList;
 	}
 		
 	public int getNumIncompleteTopics(){
@@ -94,11 +116,16 @@ public class TopicsManager {
 		return numDuplicateTopics;
 	}
 	
+	public int getNumDuplicateTopicsWithDifferingCategoryIDs(){
+		return numDuplicateTopicsWithDifferingCategoryIDs;
+	}
+	
 	public String report(){
 		String reportStr = "REPORT:\n\tTopics in map: " + topicsMap.size()
 				+ "\n\tIncomplete topics: " + numIncompleteTopics 
 				+ "\n\tMalformed topics: " + numMalformedTopics
 				+ "\n\tDuplicate topics: " + numDuplicateTopics
+				+ "\n\tDuplicate topics with differing category IDs: " + numDuplicateTopicsWithDifferingCategoryIDs
 				+ "\n\tTopic starts: " + numTopicStarts
 				+ "\n\tTopic ends: " + numTopicEnds
 				+ "\nEND REPORT.";

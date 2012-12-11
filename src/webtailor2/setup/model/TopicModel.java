@@ -9,7 +9,7 @@ import java.util.LinkedList;
  *
  */
 public class TopicModel {
-	private int categoryID;
+	private LinkedList<Integer> categoryIDs;
 	private String title;
 	private LinkedList<String> childrenTitles;
 	private String description;
@@ -17,14 +17,16 @@ public class TopicModel {
 	private static final String EMPTY = "EMPTY";
 	
 	public TopicModel(){
-		categoryID = -1;
+		categoryIDs = null;
 		title = EMPTY;
 		childrenTitles = new LinkedList<String>();
 		description = EMPTY;
 	}
 	
 	public TopicModel(int categoryID, String title, Collection<String> childrenTitles, String description){
-		this.categoryID = categoryID;
+		categoryIDs = new LinkedList<Integer>();
+		categoryIDs.add(categoryID);
+		
 		this.title = title;
 		this.description = description;
 		
@@ -37,8 +39,12 @@ public class TopicModel {
 	}
 	
 	//ACCESSORS
-	public int getCategoryID(){
-		return categoryID;
+	public LinkedList<Integer> getCategoryIDs(){
+		return categoryIDs;
+	}
+	
+	public boolean containsCategoryID(int categoryID){
+		return categoryIDs.contains((Integer)categoryID);
 	}
 	
 	public String getTitle(){
@@ -58,8 +64,26 @@ public class TopicModel {
 	}
 	
 	//MUTATORS
-	public void setCategoryID(int categoryID){
-		this.categoryID = categoryID;
+	public void setCategoryIDs(LinkedList<Integer> categoryIDs){
+		this.categoryIDs = categoryIDs;
+	}
+	
+	public boolean addCategoryID(int categoryID){
+		if(!categoryIDs.contains(categoryID)){
+			categoryIDs.add(categoryID);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean removeCategoryID(int categoryID){
+		int index = categoryIDs.indexOf((Integer)categoryID);
+		if(index < 0){//categoryID not in list
+			return false;
+		}
+		
+		categoryIDs.remove(index);
+		return true;
 	}
 	
 	public void setTitle(String title){
