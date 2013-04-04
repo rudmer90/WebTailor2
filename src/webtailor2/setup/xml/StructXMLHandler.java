@@ -9,13 +9,14 @@ import org.xml.sax.helpers.DefaultHandler;
 import webtailor2.setup.TopicsManager;
 
 public class StructXMLHandler extends DefaultHandler {
-	private String currentValue;
+	private StringBuilder currentValue;
 	
 	private TopicsManager topicsManager;
 	private boolean inTopic;
 	
 	private int categoryID;
 	private String title;
+	private String topicIDStr;
 	private String description;
 	private LinkedList<String> childrenTitles;
 	
@@ -46,8 +47,11 @@ public class StructXMLHandler extends DefaultHandler {
 	private void initVars(){
 		categoryID = -1;
 		title = null;
+		topicIDStr = null;
 		description = null;
 		childrenTitles = null;
+		
+		currentValue = new StringBuilder();
 	}
 	
 	public TopicsManager getTopicsManager(){
@@ -67,11 +71,12 @@ public class StructXMLHandler extends DefaultHandler {
 			topicsManager.incrementNumTopicStarts();
 			
 			//TODO: handle attributes 
+			topicIDStr = attributes.getValue(XMLConstants.R_ID);
 		}
 		
 		//TODO: handle other tags
 		
-		currentValue = new String();
+		currentValue.setLength(0);
 	}
 	
 	/** Called when tag closing ( ex:- <name>AndroidPeople</name> -- </name> )*/
@@ -79,26 +84,26 @@ public class StructXMLHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		//TODO: handle other tags
 		if(qName.equalsIgnoreCase(XMLConstants.TITLE)){
-			title = currentValue;
+			title = currentValue.toString();
 		}
 		else if(qName.equalsIgnoreCase(XMLConstants.CATEGORY_ID)){
-			categoryID = Integer.parseInt(currentValue);
+			categoryID = Integer.parseInt(currentValue.toString());
 		}		
 		else if(qName.equalsIgnoreCase(XMLConstants.TOPIC)){
 			topicsManager.incrementNumTopicEnds();
 			inTopic = false;
 			
-			topicsManager.addTopic(categoryID, title, childrenTitles, description);
+			topicsManager.addTopic(topicIDStr, categoryID, title, childrenTitles, description);
 		}
-		currentValue = new String();
+		currentValue.setLength(0);
 	}
 	
 	/** Called to get tag characters ( ex:- <name>AndroidPeople</name>
 	* -- to get AndroidPeople Character ) */
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-			currentValue += new String(ch, start, length);
-			if(!currentValue.isEmpty()){
+			currentValue.append(ch, start, length);
+			if(currentValue.length() == 0){
 				//System.out.println("CURRENT VALUE = " + currentValue);
 			}
 	}

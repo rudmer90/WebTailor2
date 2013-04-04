@@ -22,13 +22,13 @@ public class TopicsManager {
 				numDuplicateTopicsWithDifferingCategoryIDs = 0;
 	}
 	
-	public void addTopic(int categoryID, String title, Collection<String> childrenTitles, String description){
+	public void addTopic(String topicIDStr, int categoryID, String title, Collection<String> childrenTitles, String description){
 		TopicModel topic;
 		
-		if(categoryID != -1 && title != null  && !title.isEmpty()){
-			if(topicsMap.containsKey(title)){
+		if(topicIDStr != null && !topicIDStr.isEmpty() && categoryID != -1 && title != null  && !title.isEmpty()){
+			if(topicsMap.containsKey(topicIDStr)){
 				incrementNumDuplicateTopics();
-				topic = topicsMap.get(title);
+				topic = topicsMap.get(topicIDStr);
 				
 				if(topic.containsCategoryID(categoryID)){
 					incrementNumDuplicateTopicsWithDifferingCategoryIDs();
@@ -38,8 +38,8 @@ public class TopicsManager {
 				}
 			}
 			else{
-				topic = new TopicModel(categoryID, title, childrenTitles, description);
-				topicsMap.put(topic.getTitle(), topic);	
+				topic = new TopicModel(topicIDStr, categoryID, title, childrenTitles, description);
+				topicsMap.put(topic.getTopicIDStr(), topic);	
 			}
 			
 			topicsList.add(topic);

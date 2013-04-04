@@ -10,24 +10,30 @@ import java.util.LinkedList;
  */
 public class TopicModel {
 	private LinkedList<Integer> categoryIDs;
-	private String title;
+	private LinkedList<String> titles;
+	private String topicIDStr;
 	private LinkedList<String> childrenTitles;
 	private String description;
 	
 	private static final String EMPTY = "EMPTY";
 	
 	public TopicModel(){
-		categoryIDs = null;
-		title = EMPTY;
+		categoryIDs = new LinkedList<Integer>();
+		titles = new LinkedList<String>();
 		childrenTitles = new LinkedList<String>();
+		topicIDStr = EMPTY;
 		description = EMPTY;
 	}
 	
-	public TopicModel(int categoryID, String title, Collection<String> childrenTitles, String description){
+	public TopicModel(String topicIDStr, int categoryID, String title, Collection<String> childrenTitles, String description){
+		this.topicIDStr = topicIDStr;
+		
 		categoryIDs = new LinkedList<Integer>();
 		categoryIDs.add(categoryID);
 		
-		this.title = title;
+		titles = new LinkedList<String>();
+		titles.add(title);
+		
 		this.description = description;
 		
 		if(childrenTitles != null){
@@ -39,6 +45,10 @@ public class TopicModel {
 	}
 	
 	//ACCESSORS
+	public String getTopicIDStr(){
+		return topicIDStr;
+	}
+	
 	public LinkedList<Integer> getCategoryIDs(){
 		return categoryIDs;
 	}
@@ -47,8 +57,8 @@ public class TopicModel {
 		return categoryIDs.contains((Integer)categoryID);
 	}
 	
-	public String getTitle(){
-		return title;
+	public LinkedList<String> getTitles(){
+		return titles;
 	}
 	
 	public LinkedList<String> getChildrenTitles(){
@@ -64,6 +74,10 @@ public class TopicModel {
 	}
 	
 	//MUTATORS
+	public void setTopicIDStr(String topicIDStr){
+		this.topicIDStr = topicIDStr;
+	}
+	
 	public void setCategoryIDs(LinkedList<Integer> categoryIDs){
 		this.categoryIDs = categoryIDs;
 	}
@@ -86,8 +100,16 @@ public class TopicModel {
 		return true;
 	}
 	
-	public void setTitle(String title){
-		this.title = title;
+	public void setTitles(Collection<String> titles){
+		this.titles = new LinkedList<String>(titles);
+	}
+	
+	public void addTitle(String title){
+		titles.add(title);
+	}
+	
+	public void removeTitle(String title){
+		titles.remove(title);
 	}
 	
 	public void setDescription(String description){

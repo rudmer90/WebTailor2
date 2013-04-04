@@ -47,13 +47,18 @@ public class ReadODPStructure {
 			
 			System.out.println("WRITING TOPICS...");
 			HashMap<String, TopicModel> topicsMap = structHandler.getTopicsManager().getTopicsMap();
+			LinkedList<TopicModel> duplicateTopics = new LinkedList<TopicModel>();
 			LinkedList<TopicModel> topicsList = structHandler.getTopicsManager().getTopicsList();
 			try {
 				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/Users/johande/workspace/output/topics.u8"), "UTF-8"));
 				
 				Collection<TopicModel> topics = topicsMap.values();
 				for(TopicModel topic : topics){
-					bw.write(topic.getTitle() + "(");
+					bw.write(topic.getTopicIDStr() + "(");
+					
+					if(topic.getCategoryIDs().size() > 1){
+						duplicateTopics.add(topic);
+					}
 					
 					for(Integer categoryID : topic.getCategoryIDs()){
 						bw.write(categoryID + " ");
@@ -62,9 +67,19 @@ public class ReadODPStructure {
 				}				
 				bw.close();
 				
+				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/Users/johande/workspace/output/duplicateTopics.u8"), "UTF-8"));
+				for(TopicModel topic : duplicateTopics){
+					bw.write(topic.getTopicIDStr() + "(");
+					for(Integer categoryID : topic.getCategoryIDs()){
+						bw.write(categoryID + " ");
+					}
+					bw.write(")\n\n");
+				}
+				bw.close();
+				
 				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("/Users/johande/workspace/output/topics_sorted.u8"), "UTF-8"));
 				for(TopicModel topic : topicsList){
-					bw.write(topic.getTitle() + "\n");
+					bw.write(topic.getTopicIDStr() + "\n");
 				}
 				bw.close();
 				

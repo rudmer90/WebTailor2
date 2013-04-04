@@ -8,4 +8,6 @@ public class XMLConstants {
 	public static final String NARROW = "narrow";
 	public static final String NARROW1 = NARROW + "1";
 	public static final String NARROW2 = NARROW + "2";
+	
+	public static final String R_ID = "r:id";
 }
